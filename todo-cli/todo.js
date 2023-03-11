@@ -1,94 +1,61 @@
-const todoList = () => {
-  all = []
-  const add = (todoItem) => {
-    all.push(todoItem)
-  }
-  const markAsComplete = (index) => {
-    all[index].completed = true
-  }
+const todoList = require("../todo");
+const { add, markAsComplete, overdue, dueToday, dueLater } = todoList();
 
-  const overdue = () => {
-    // Write the date check condition here and return the array
-    // of overdue items accordingly.
-    return all.filter((todo) => todo.dueDate < today);
-  }
-
-  const dueToday = () => {
-    // Write the date check condition here and return the array
-    // of todo items that are due today accordingly.
-    return all.filter((todo) => todo.dueDate == today);
-  }
-
-  const dueLater = () => {
-    // Write the date check condition here and return the array
-    // of todo items that are due later accordingly.
-    return all.filter((todo) => todo.dueDate > today);
-  }
-
-  const toDisplayableList = (list) => {
-    // Format the To-Do list here, and return the output string
-    // as per the format given above.
-    return list
-      .map(
-        (todo) =>
-          `${todo.completed ? "[x]" : "[ ]"} ${todo.title} ${todo.dueDate == today ? "" : todo.dueDate
-          }`
-      )
-      .join("\n");
-  }
-
-  return {
-    all,
-    add,
-    markAsComplete,
-    overdue,
-    dueToday,
-    dueLater,
-    toDisplayableList
-  };
+const formattedDate = (d) => {
+  return d.toISOString().split("T")[0];
 };
-
-// ####################################### #
-// DO NOT CHANGE ANYTHING BELOW THIS LINE. #
-// ####################################### #
-
-const todos = todoList();
-
-const formattedDate = d => {
-  return d.toISOString().split("T")[0]
-}
-
-var dateToday = new Date()
-const today = formattedDate(dateToday)
+var dateToday = new Date();
+const today = formattedDate(dateToday);
 const yesterday = formattedDate(
   new Date(new Date().setDate(dateToday.getDate() - 1))
-)
+);
 const tomorrow = formattedDate(
   new Date(new Date().setDate(dateToday.getDate() + 1))
-)
+);
 
-todos.add({ title: 'Submit assignment', dueDate: yesterday, completed: false })
-todos.add({ title: 'Pay rent', dueDate: today, completed: true })
-todos.add({ title: 'Service Vehicle', dueDate: today, completed: false })
-todos.add({ title: 'File taxes', dueDate: tomorrow, completed: false })
-todos.add({ title: 'Pay electric bill', dueDate: tomorrow, completed: false })
+describe("Todolist Test Suite", () => {
+  test("Should add new todo", () => {
+    expect(all.length).toBe(0);
+    add({
+      title: "Eye Test",
+      completed: false,
+      dueDate: yesterday,
+    });
+    expect(all.length).toBe(1);
+  });
 
-console.log("My Todo-list\n")
+  test("Should mark a todo as complete", () => {
+    expect(all[0].completed).toBe(false);
+    markAsComplete(0);
+    expect(all[0].completed).toBe(true);
+  });
 
-console.log("Overdue")
-var overdues = todos.overdue()
-var formattedOverdues = todos.toDisplayableList(overdues)
-console.log(formattedOverdues)
-console.log("\n")
+  test("checks retrieval of overdue items", () => {
+    add({
+      title: "AMM Assignment",
+      completed: false,
+      dueDate: yesterday,
+    });
+    expect(overdue().length).toBe(2);
+  });
 
-console.log("Due Today")
-let itemsDueToday = todos.dueToday()
-let formattedItemsDueToday = todos.toDisplayableList(itemsDueToday)
-console.log(formattedItemsDueToday)
-console.log("\n")
+  test("checks retrieval of due today items", () => {
+    expect(dueToday().length).toBe(0);
+    add({
+      title: "haircut",
+      completed: false,
+      dueDate: today,
+    });
+    expect(dueToday().length).toBe(1);
+  });
 
-console.log("Due Later")
-let itemsDueLater = todos.dueLater()
-let formattedItemsDueLater = todos.toDisplayableList(itemsDueLater)
-console.log(formattedItemsDueLater)
-console.log("\n\n")
+  test("checks retrieval of duelater items", () => {
+    expect(dueLater().length).toBe(0);
+    add({
+      title: "PupilFirst level 4",
+      completed: false,
+      dueDate: tomorrow,
+    });
+    expect(dueLater().length).toBe(1);
+  });
+});
